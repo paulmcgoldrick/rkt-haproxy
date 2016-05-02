@@ -39,8 +39,14 @@ RUN set -x \
             | sort -u \
     )" \
     && apk add --virtual .haproxy-rundeps $runDeps \
+    && apk add py-twisted
+    && apk add py-yaml
+    && apk add py-jinja2
     && apk del .build-deps
 
 COPY docker-entrypoint.sh /
+COPY txcontainerkit /
+COPY ck_conf.yml /
+COPY haproxy.cfg.j2 /
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg"]
+CMD ["python", "/txcontainerkit/service.py"]

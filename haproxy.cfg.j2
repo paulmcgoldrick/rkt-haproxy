@@ -1,0 +1,47 @@
+global
+    #chroot /var/lib/haproxy
+    #user haproxy
+    #group haproxy
+    #daemon
+    #log /dev/log local0 debug
+    #log /dev/log local1 debug
+
+defaults
+    log /dev/log local1 debug
+    mode http
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+    option httpclose
+    option redispatch
+    option abortonclose
+    option httplog
+    option dontlognull
+    #errorfile 400 /etc/haproxy/errors/400.http
+    #errorfile 403 /etc/haproxy/errors/403.http
+    #errorfile 408 /etc/haproxy/errors/408.http
+    #errorfile 500 /etc/haproxy/errors/500.http
+    #errorfile 502 /etc/haproxy/errors/502.http
+    #errorfile 504 /etc/haproxy/errors/504.http
+
+backend gitlab_ssh
+    mode tcp
+    option tcplog
+    timeout server 2h
+    server gitlabssh {{gitlab__ip_address}}:22
+
+backend gitlab_web_backend
+    mode http
+    server gitlab_web_1 {{gitlab__ip_address}}:80
+
+frontend gitlab_ssh_frontend
+    mode tcp
+    timeout client 2h
+    bind {{eth2}}:22
+    acl is_ssh dst_port 22
+    use_backend gitlab_ssh if is_ssh
+
+frontend gitlab_web
+    mode http
+    bind {{eth1}}:80
+    default_backend gitlab_web_backend

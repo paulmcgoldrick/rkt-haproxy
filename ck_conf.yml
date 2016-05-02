@@ -1,0 +1,15 @@
+---
+app:
+  name: rkt-haproxy
+  start: /usr/local/sbin/haproxy -d -f /etc/haproxy/haproxy.cfg
+  restart: /usr/local/sbin/haproxy -d -f /etc/haproxy/haproxy.cfg -sf {{pid}}
+  stop: 15
+  template: "/haproxy.cfg.j2"
+  dest: "/usr/local/etc/haproxy/haproxy.cfg"
+  vars:
+      public_ip: 192.168.1.129
+  publish_vars: {ip_address: "{{eth0}}"}
+  wait_keys:
+      exists:
+        - "gitlab/ip_address"
+etcd_host: 172.16.28.1:2379
